@@ -133,5 +133,7 @@ public class Delivery {
         this.deliveryState = deliveryState;
     }
 
-    public void gogo() {}
+    public void gogo() {
+        System.out.println("EHL");
+    }
 }
