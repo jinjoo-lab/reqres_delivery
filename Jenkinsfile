@@ -128,7 +128,7 @@ environment {
                             git config --global user.email "your-email@example.com"
                             git config --global user.name "Jenkins CI"
                             rm -rf repo
-                            git clone https://github.com/jinjoo-lab/reqres_delivery repo
+                            git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@${GITHUB_REPO} repo
                             cp azure/deploy.yaml repo/azure/deploy.yaml
                             cd repo
                             git add azure/deploy.yaml
