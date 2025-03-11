@@ -19,9 +19,9 @@ environment {
         stage('Check Modified Files') {
             steps {
                 script {
-                    // def services = SERVICES.tokenize(',') // Use tokenize to split the string into a list
-                    // for (int i = 0; i < services.size(); i++) {
-                        // def service = services[i] // Define service as a def to ensure serialization
+                    def services = SERVICES.tokenize(',') // Use tokenize to split the string into a list
+                    for (int i = 0; i < services.size(); i++) {
+                        def service = services[i] // Define service as a def to ensure serialization
                         // Git 변경된 파일 목록 가져오기
                         def changedFiles = sh(returnStdout: true, script: 'git diff --name-only HEAD~1 HEAD').trim().split('\n')
 
