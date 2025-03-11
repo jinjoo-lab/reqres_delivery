@@ -124,19 +124,28 @@ environment {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: GITHUB_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                        sh """
-                            git config --global user.email "your-email@example.com"
-                            git config --global user.name "Jenkins CI"
-                            rm -rf repo
-                            git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@${GITHUB_REPO} repo
+                        // Git 설정에 실제 이메일 주소 사용
+                        sh "git config --global user.email '${GIT_USER_EMAIL}'"
+                        sh "git config --global user.name 'Jenkins CI'"
+                        
+                        // 임시 디렉토리 생성 및 이동
+                        sh 'rm -rf repo || true'
+                        
+                        // 보안 경고를 피하기 위해 따옴표 처리 수정
+                        withEnv(["GITHUB_URL=https://${GIT_USERNAME}:${GIT_PASSWORD}@${GITHUB_REPO}"]) {
+                            sh 'git clone "${GITHUB_URL}" repo'
+                        }
+                        
+                        // 파일 복사 및 커밋
+                        sh '''
                             cp azure/deploy.yaml repo/azure/deploy.yaml
                             cd repo
                             git add azure/deploy.yaml
-                            git commit -m "Update deploy.yaml with build ${env.BUILD_NUMBER}"
+                            git commit -m "Update deploy.yaml with build ${BUILD_NUMBER}" || true
                             git push origin ${GITHUB_BRANCH}
                             cd ..
                             rm -rf repo
-                        """
+                        '''
                     }
                 }
             }
