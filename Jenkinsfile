@@ -43,12 +43,22 @@ environment {
 
 
         stage('Clone Repository') {
+            when {
+                expression {
+                    currentBuild.result != 'NOT_BUILT'
+                }
+            }        
             steps {
                 checkout scm
             }
         }
         
         stage('Maven Build') {
+            when {
+                expression {
+                    currentBuild.result != 'NOT_BUILT'
+                }
+            }
             steps {
                 withMaven(maven: 'Maven') {
                     sh 'mvn package -DskipTests'
@@ -57,6 +67,11 @@ environment {
         }
         
         stage('Docker Build') {
+            when {
+                expression {
+                    currentBuild.result != 'NOT_BUILT'
+                }
+            }
             steps {
                 script {
                     image = docker.build("${REGISTRY}/${IMAGE_NAME}:v${env.BUILD_NUMBER}")
@@ -65,6 +80,11 @@ environment {
         }
         
         stage('Push to ACR') {
+            when {
+                expression {
+                    currentBuild.result != 'NOT_BUILT'
+                }
+            }
             steps {
                 script {
                     sh "az acr login --name ${REGISTRY.split('\\.')[0]}"
@@ -75,6 +95,11 @@ environment {
         }
 
         stage('CleanUp Images') {
+            when {
+                expression {
+                    currentBuild.result != 'NOT_BUILT'
+                }
+            }
             steps {
                 sh """
                 docker rmi ${REGISTRY}/${IMAGE_NAME}:v$BUILD_NUMBER
