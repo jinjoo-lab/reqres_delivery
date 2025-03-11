@@ -16,47 +16,13 @@ environment {
 }
 
     stages {
-        stage('Check Modified Files') {
-            steps {
-                script {
-                    def services = SERVICES.tokenize(',') // Use tokenize to split the string into a list
-                    for (int i = 0; i < services.size(); i++) {
-                        def service = services[i] // Define service as a def to ensure serialization
-                        // Git 변경된 파일 목록 가져오기
-                        def changedFiles = sh(returnStdout: true, script: 'git diff --name-only HEAD~1 HEAD').trim().split('\n')
-
-                    // 'src/' 폴더 변경 여부 확인
-                        def targetFolder = 'reqres_delivery/src/*'
-                        def isModified = changedFiles.any { it.startsWith(targetFolder) }
-        
-                        if (isModified) {
-                            echo "Changes detected in ${targetFolder}. Proceeding with the pipeline."
-                        } else {
-                            echo "No changes in ${targetFolder}. Stopping pipeline execution."
-                            currentBuild.result = 'NOT_BUILT'
-                            return
-                        }
-                    }
-                }
-            }
-        }
         stage('Clone Repository') {
-            when {
-                expression {
-                    currentBuild.result != 'NOT_BUILT'
-                }
-            }
             steps {
                 checkout scm
             }
         }
         
         stage('Maven Build') {
-            when {
-                expression {
-                    currentBuild.result != 'NOT_BUILT'
-                }
-            }
             steps {
                 withMaven(maven: 'Maven') {
                     sh 'mvn package -DskipTests'
@@ -65,11 +31,6 @@ environment {
         }
         
         stage('Docker Build') {
-            when {
-                expression {
-                    currentBuild.result != 'NOT_BUILT'
-                }
-            }
             steps {
                 script {
                     image = docker.build("${REGISTRY}/${IMAGE_NAME}:v${env.BUILD_NUMBER}")
@@ -78,11 +39,6 @@ environment {
         }
         
         stage('Push to ACR') {
-            when {
-                expression {
-                    currentBuild.result != 'NOT_BUILT'
-                }
-            }
             steps {
                 script {
                     sh "az acr login --name ${REGISTRY.split('\\.')[0]}"
@@ -92,14 +48,7 @@ environment {
             }
         }
 
-    
-        
         stage('CleanUp Images') {
-            when {
-                expression {
-                    currentBuild.result != 'NOT_BUILT'
-                }
-            }
             steps {
                 sh """
                 docker rmi ${REGISTRY}/${IMAGE_NAME}:v$BUILD_NUMBER
@@ -116,8 +65,8 @@ environment {
             steps {
                 script {
                     sh """
-                    sed -i 's|image: \"${REGISTRY}/${IMAGE_NAME}:.*\"|image: \"${REGISTRY}/${IMAGE_NAME}:v${env.BUILD_ID}\"|' kubernetes/deploy.yaml
-                    cat kubernetes/deploy.yaml
+                    sed -i 's|image: \"${REGISTRY}/${IMAGE_NAME}:.*\"|image: \"${REGISTRY}/${IMAGE_NAME}:v${env.BUILD_ID}\"|' azure/deploy.yaml
+                    cat azure/deploy.yaml
                     """
                 }
             }
@@ -138,7 +87,7 @@ environment {
                             git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@${GITHUB_REPO} repo
                             cp azure/deploy.yaml repo/kubernetes/deploy.yaml
                             cd repo
-                            git add kubernetes/deploy.yaml
+                            git add azure/deploy.yaml
                             git commit -m "Update deploy.yaml with build ${env.BUILD_NUMBER}"
                             git push origin ${GITHUB_BRANCH}
                             cd ..
