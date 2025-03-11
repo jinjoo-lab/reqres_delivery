@@ -133,4 +133,5 @@ public class Delivery {
         this.deliveryState = deliveryState;
     }
 
+    public void gogo() {}
 }
