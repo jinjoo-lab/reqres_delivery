@@ -65,13 +65,11 @@ pipeline {
             steps {
                 script {
                     sh "az aks get-credentials --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER}"
-                    sh """
-                    sed 's/latest/v${env.BUILD_ID}/g' azure/deploy.yaml > output.yaml
-                    cat output.yaml
-                    kubectl apply -f output.yaml
-                    kubectl apply -f kubernetes/service.yaml
-                    rm output.yaml
-                    """
+                    sh sed 's/latest/v${env.BUILD_ID}/g' azure/deploy.yaml > output.yaml
+                    sh cat output.yaml
+                    sh kubectl apply -f output.yaml
+                    sh kubectl apply -f kubernetes/service.yaml
+                    sh rm output.yaml
                 }
             }
         }
