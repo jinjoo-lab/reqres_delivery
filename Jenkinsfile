@@ -86,7 +86,7 @@ environment {
                             git config --global user.name "Jenkins CI"
                             rm -rf repo
                             git clone https://github.com/jinjoo-lab/reqres_delivery repo
-                            cp azure/deploy.yaml repo/kubernetes/deploy.yaml
+                            cp azure/deploy.yaml repo/azure/deploy.yaml
                             cd repo
                             git add azure/deploy.yaml
                             git commit -m "Update deploy.yaml with build ${env.BUILD_NUMBER}"
