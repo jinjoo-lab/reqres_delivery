@@ -134,6 +134,6 @@ public class Delivery {
     }
 
     public void gogo() {
-        System.out.println("EHLㄴㄴ");
+        System.out.println("EHLㄴㄴㄴㅇㅁㅇ");
     }
 }
